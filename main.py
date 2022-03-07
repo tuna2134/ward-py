@@ -21,7 +21,7 @@ async def verify(request):
 
 @client.web.post("/verify")
 async def verify_check(request):
-    check = await hcaptcha.verify(request.form["h-captcha-response"])
+    check = await hcaptcha.siteverify(request.form["h-captcha-response"])
     if check:
         pass
     else:
