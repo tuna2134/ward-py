@@ -1,9 +1,9 @@
 from aiohttp import ClientSession
 
 class hCaptcha:
-    def __init__(self, secret, loop):
+    def __init__(self, secret):
         self.secret = secret
-        self.session = ClientSession(loop=loop)
+        self.session = ClientSession()
         
     async def siteverify(self, token):
         async with self.session.post("https://hcaptcha.com/siteverify",
