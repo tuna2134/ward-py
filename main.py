@@ -70,14 +70,24 @@ async def main(request):
 
 @client.web.get("/verify/<name>")
 async def verify(request, name):
-    return await template("verify.html", sitekey=config.sitekey)
+    async with connect("main.db") as db:
+        cursor = await db.execute("SELECT * FROM url WHERE name=?", (name,))
+        if (await cursor.fetchone()):
+            return await template("verify.html", sitekey=config.sitekey)
+        else:
+            return text("invalid url")
 
 @client.web.post("/verify/<name>")
 async def verify_check(request):
-    check = await hcaptcha.siteverify(request.form["h-captcha-response"])
-    if check:
-        pass
-    else:
-        pass
+    async with connect("main.db") as db:
+        cursor = await db.execute("SELECT * FROM url WHERE name=?", (name,))
+        if (await cursor.fetchone()):
+            check = await hcaptcha.siteverify(request.form["h-captcha-response"])
+            if check:
+                pass
+            else:
+                return await template("verify.html", sitekey=config.sitekey)
+        else:
+            return text("invalid url")
 
 client.run(config.token, config.ip, config.port)
