@@ -44,7 +44,7 @@ async def main(request):
 
 @client.web.get("/verify")
 async def verify(request):
-    return await template("verify.html")
+    return await template("verify.html", sitekey=config.sitekey)
 
 @client.web.post("/verify")
 async def verify_check(request):
