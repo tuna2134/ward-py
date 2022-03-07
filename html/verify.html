@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>Discord verfication</title>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  </head>
+  <body>
+    <h1>Please check to a box</h1>
+    <form id="captcha" method="post">
+      <div class="h-captcha" data-callback="onSubmit" data-sitekey="{{ your_site_key }}"></div>
+    </form>
+    <script type="text/javascript">
+      function onSubmit(token) {
+        document.getElementById('captcha').submit()
+      }
+    </script>
+  </body>
+</html>
