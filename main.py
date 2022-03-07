@@ -1,6 +1,8 @@
 from lib.client import Client
 from lib.hcaptcha import hCaptcha
+from discord import app_commands, Role
 import config
+from aiosqlite import connect
 from jinja2 import Environment, FileSystemLoader
 from discord import app_commands
 from sanic import text
@@ -19,6 +21,22 @@ async def template(filename, *args, **kwargs):
 @client.event
 async def on_ready():
     print("Ready!")
+    
+class hcaptchaGroup(app_commands.Group):
+    def __init__(self):
+        super().__init__(name="ward", description="")
+        
+    @app_commands.command(description="setting")
+    @app_commands.descripe(role="Roles to be granted when authentication is successful.")
+    async def setup(self, interaction, role: Role):
+        async with connect("main.db") as db:
+            cursor = await db.execute("SELECT * FROM role")
+            if (await cursor.fetchone()) is not None:
+                await db.execute("INSERT INTO role VALUES(?)", (role.id,))
+            else:
+                await db.execute("DELETE FROM role")
+                await db.execute("INSERT INTO role VALUES(?)", (role.id,))
+        await interaction.response.send_message("setting it!")
     
 @client.route("/")
 async def main(request):
