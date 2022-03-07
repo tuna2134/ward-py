@@ -7,6 +7,7 @@ from aiosqlite import connect
 from jinja2 import Environment, FileSystemLoader
 from discord import app_commands
 from sanic import text
+import random, string
 
 client = Client()
 hcaptcha = hCaptcha()
@@ -22,6 +23,21 @@ async def template(filename, *args, **kwargs):
 @client.event
 async def on_ready():
     print("Ready!")
+    
+def randomname(self, n):
+    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
+    return ''.join(randlst)
+    
+@client.event
+async def on_interaction(interaction):
+    if interaction.type != discord.InteractionType.component:
+        return
+    data = interaction.data
+    if data["custom_id"] == "captcha_start_button":
+        async with connect("main.db") as db:
+            name = randomname(10)
+            await db.execute("INSERT INTO url VALUES(?, ?)", (name, interaction.user.id))
+            await interaction.response.send_message(f"{config.url}/verify/{name}", ephemeral=True)
     
 class hcaptchaGroup(app_commands.Group):
     def __init__(self):
@@ -52,11 +68,11 @@ class hcaptchaGroup(app_commands.Group):
 async def main(request):
     return text("404 error")
 
-@client.web.get("/verify")
-async def verify(request):
+@client.web.get("/verify/<name>")
+async def verify(request, name):
     return await template("verify.html", sitekey=config.sitekey)
 
-@client.web.post("/verify")
+@client.web.post("/verify/<name>")
 async def verify_check(request):
     check = await hcaptcha.siteverify(request.form["h-captcha-response"])
     if check:
