@@ -1,6 +1,7 @@
 from lib.client import Client
 from lib.hcaptcha import hCaptcha
 from discord import app_commands, Role
+import discord
 import config
 from aiosqlite import connect
 from jinja2 import Environment, FileSystemLoader
@@ -26,9 +27,9 @@ class hcaptchaGroup(app_commands.Group):
     def __init__(self):
         super().__init__(name="ward", description="")
         
-    @app_commands.command(description="setting")
-    @app_commands.descripe(role="Roles to be granted when authentication is successful.")
-    async def setup(self, interaction, role: Role):
+    @app_commands.command(description="setting a bot")
+    @app_commands.describe(role="Roles to be granted when authentication is successful.")
+    async def setting(self, interaction, role: Role):
         async with connect("main.db") as db:
             cursor = await db.execute("SELECT * FROM role")
             if (await cursor.fetchone()) is not None:
@@ -37,6 +38,15 @@ class hcaptchaGroup(app_commands.Group):
                 await db.execute("DELETE FROM role")
                 await db.execute("INSERT INTO role VALUES(?)", (role.id,))
         await interaction.response.send_message("setting it!")
+        
+    @app_commands.command(description="Send the panel necessary for authentication.")
+    @app_commands.describe(channel="Please specify the channel you want to send the panel.")
+    async def send(self, interaction, channel: discord.TextChannel):
+        embed = discord.Embed(title="Captcha Panel", description="please click a button")
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="click!", custom_id="captcha_start_button"))
+        await channel.send(embed=embed, view=view)
+        await interaction.response.send_message("send a panel!")
     
 @client.route("/")
 async def main(request):
