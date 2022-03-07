@@ -1,11 +1,20 @@
 from lib.client import Client
 from lib.hcaptcha import hCaptcha
 import config
+from jinja2 import Environment, FileSystemLoader
 from discord import app_commands
 from sanic import text
 
 client = Client()
 hcaptcha = hCaptcha()
+env = Environment(
+    loader=FileSystemLoader("./html"),
+    enable_async=True
+)
+
+async def template(filename, *args, **kwargs):
+    content = await env.get_template(filename).render_async(kwargs)
+    return html(content)
 
 @client.event
 async def on_ready():
@@ -17,7 +26,7 @@ async def main(request):
 
 @client.web.get("/verify")
 async def verify(request):
-    pass
+    return await template("verify.html")
 
 @client.web.post("/verify")
 async def verify_check(request):
