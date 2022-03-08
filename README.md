@@ -26,4 +26,4 @@ python3 main.py
 | name | description |
 | :-:  |      :-:    |
 | ward setup | setup a ward |
-| ward send | send a captcha panel
+| ward send | send a captcha panel |
