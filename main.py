@@ -23,6 +23,9 @@ async def template(filename, *args, **kwargs):
 @client.event
 async def on_ready():
     print("Ready!")
+    async with connect("main.db") as db:
+        await db.execute("CREATE TABLE IF NOT EXISTS url(url, user)")
+        await db.execute("CREATE TABLE IF NOT EXISTS role(guild, role)")
     
 def randomname(self, n):
     randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
