@@ -49,10 +49,10 @@ class hcaptchaGroup(app_commands.Group):
         async with connect("main.db") as db:
             cursor = await db.execute("SELECT * FROM role")
             if (await cursor.fetchone()) is not None:
-                await db.execute("INSERT INTO role VALUES(?)", (role.id,))
+                await db.execute("INSERT INTO role VALUES(?, ?)", (interaction.guild.id, role.id))
             else:
                 await db.execute("DELETE FROM role")
-                await db.execute("INSERT INTO role VALUES(?)", (role.id,))
+                await db.execute("INSERT INTO role VALUES(?, ?)", (interaction.guild.id, role.id))
         await interaction.response.send_message("setting it!")
         
     @app_commands.command(description="Send the panel necessary for authentication.")
@@ -81,10 +81,17 @@ async def verify(request, name):
 async def verify_check(request):
     async with connect("main.db") as db:
         cursor = await db.execute("SELECT * FROM url WHERE name=?", (name,))
-        if (await cursor.fetchone()):
+        data = await cursor.fetchone()
+        if data:
             check = await hcaptcha.siteverify(request.form["h-captcha-response"])
             if check:
-                pass
+                cursor = await db.execute("SELECT * FROM role")
+                guildid, roleid = await cursor.fetchone()
+                guild = await client.fetch_guild(guildid)
+                role = guild.get_role(roleid)
+                member = await guild.fetch_member(data[1])
+                await member.add_roles(role)
+                return text("Successful authentication.")
             else:
                 return await template("verify.html", sitekey=config.sitekey)
         else:
