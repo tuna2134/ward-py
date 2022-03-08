@@ -8,3 +8,6 @@ port = 8080
 # hCaptcha settings
 sitekey = ""
 secretkey = ""
+
+# domain settings
+url = "http://localhost:8080"
