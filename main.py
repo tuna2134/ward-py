@@ -10,7 +10,7 @@ from sanic import text
 import random, string
 
 client = Client()
-hcaptcha = hCaptcha()
+hcaptcha = hCaptcha(config.secretkey)
 env = Environment(
     loader=FileSystemLoader("./html"),
     enable_async=True
